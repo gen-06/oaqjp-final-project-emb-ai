@@ -1,43 +1,34 @@
-from flask import Flask, render_template, request                                     #jsonify
+"""
+    SERVER.PY
+"""
+from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
 
-app = Flask(__name__)
+app = Flask("Emotion Detector")
 
-@app.route('/')
+@app.route("/emotionDetector")
+def emotion_detector_function():
+    ''' This function calls the application
+    '''
+    text_to_analyze = request.args.get('textToAnalyze')
+    response = emotion_detector(text_to_analyze)
+
+    if response['dominant_emotion'] is None:
+        response_text = "Invalid Input! Please try again."
+    else:
+        response_text = f"For the given statement, the system response is 'anger': \
+                    {response['anger']}, 'disgust': {response['disgust']}, \
+                    'fear': {response['fear']}, 'joy': {response['joy']}, \
+                    'sadness': {response['sadness']}. The dominant emotion is \
+                    {response['dominant_emotion']}."
+
+    return response_text
+
+@app.route("/")
 def render_index_page():
+    ''' This is the function to render the html interface
+    '''
     return render_template('index.html')
 
-@app.route('/emotionDetector')
-def sent_emotion():    
-    text_to_analyze = request.args.get('textToAnalyze')
-    result = emotion_detector(text_to_analyze)
-    return result
-
-        
-    
-    
-    #if not result or result['dominant_emotion'] is None:
-     #  return "Invalid text! Please try again!", 200
-
-    #response = {
-     #   "anger": result.get('anger', 0),
-      #  "disgust": result.get('disgust', 0),
-       # "fear": result.get('fear', 0),
-        #"joy": result.get('joy', 0),
-        #"sadness": result.get('sadness', 0),
-        #"dominant_emotion": result.get('dominant_emotion', 'unknown')
-    #}
-    #formatted_response = (
-       # f"For a given statement, the system response is 'anger': {response['anger']}, "
-        #f"'disgust': {response['disgust']}, "
-        #f"'fear': {response['fear']}, "
-        #f"'joy': {response['joy']},  "
-        #f"'sadness': {response['sadness']}。"
-        #f"The dominant emotion is {response['dominant_emotion']}."
-    #)
-    #return jsonify({
-    #    "raw_response": response,
-        #"formatted_response": formatted_response
-    #})
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host = "0.0.0.0", port = 5000)
